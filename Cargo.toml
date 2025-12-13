@@ -1,0 +1,43 @@
+[workspace]
+members = [
+    "order",
+    "inventory",
+    "payment",
+]
+resolver = "2"
+
+# ワークスペース全体で共有する依存関係
+[workspace.dependencies]
+# Web Framework
+actix-web = "4"
+actix-rt = "2"
+
+# Async Runtime
+tokio = { version = "1", features = ["full"] }
+async-trait = "0.1"
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "mysql", "macros", "chrono", "uuid"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Error Handling
+thiserror = "1"
+anyhow = "1"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Utility
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+dotenv = "0.15"
+
+# Kafka
+rdkafka = { version = "0.36", features = ["cmake-build"] }
+
+# Testing
+mockall = "0.13"

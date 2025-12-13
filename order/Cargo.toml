@@ -1,0 +1,40 @@
+[package]
+name = "order"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "order"
+path = "src/main.rs"
+
+[dependencies]
+# actix
+actix-web = { workspace = true }
+actix-rt = { workspace = true }
+
+# Async Runtime
+tokio = { workspace = true }
+async-trait = { workspace = true }
+
+# Database
+sqlx = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Error Handling
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+
+# Logging
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# Utility
+uuid = { workspace = true }
+chrono = { workspace = true }
+dotenv = { workspace = true }
+
+[dev-dependencies]
+mockall = { workspace = true }
