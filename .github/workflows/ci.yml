@@ -12,7 +12,24 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Install sqlx-cli
+      run: cargo install sqlx-cli --no-default-features --features mysql,native-tls
+
+    - name: Set up MySQL
+      run: |
+        docker compose -f etc/docker/docker-compose.yml up -d
+        sleep 10
+
+    - name: Run migrations
+      env:
+        DATABASE_URL: mysql://ecuser:ecpassword@localhost:3306/order_db
+      run: |
+        sqlx database create --database-url "$DATABASE_URL"
+        sqlx migrate run --source order/db/migrations --database-url "$DATABASE_URL"
+
     - name: Build
       run: cargo build --verbose
+
     - name: Run tests
       run: cargo test --verbose
