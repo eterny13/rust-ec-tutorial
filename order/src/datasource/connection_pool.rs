@@ -1,9 +1,10 @@
+use sqlx::MySqlPool;
 use sqlx::mysql::MySqlPoolOptions;
 
-pub async fn establish_connection(database_url: &str) -> sqlx::MySqlPool {
-    MySqlPoolOptions::new()
-        .max_connections(20) // 負荷に応じた適切な値に設定
+pub async fn establish_connection(database_url: &str) -> Result<MySqlPool, sqlx::Error> {
+    Ok(MySqlPoolOptions::new()
+        .max_connections(20)
         .connect(database_url)
         .await
-        .expect("Failed to create pool")
+        .expect("Failed to create pool"))
 }

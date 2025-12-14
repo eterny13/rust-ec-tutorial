@@ -1,7 +1,7 @@
-use crate::domain::order::Order;
-use crate::domain::order::OrderId;
-use crate::domain::order::OrderRepositoryError;
+use serde::{Deserialize, Serialize};
 use async_trait::async_trait;
+use crate::domain::order::{Order, OrderId};
+use crate::domain::customer::CustomerId;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum OrderRepositoryError {
