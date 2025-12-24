@@ -1,30 +1,40 @@
-use actix_web::{web, App, HttpServer};
-use sqlx::mysql::MySqlPoolOptions;
+use actix_web::{web, HttpResponse, Result};
+use std::sync::Arc;
+use crate::domain::order::OrderId;
+use crate::service::order_repository::OrderRepository;
+use crate::service::order_service::OrderService;
+use super::request::order_request::{CreateOrderRequest};
+use super::response::order_response::OrderResponse;
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    // 環境変数の読み込みやロガーの初期化
-    dotenv::dotenv().ok();
-    env_logger::init();
-    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let pool = MySqlPoolOptions::new()
-        .connect(&database_url)
-        .await
-        .expect("Failed to connect to DB");
-    HttpServer::new(move || {
-        App::new()
-            // DBプールをアプリケーションステートとして登録
-            .app_data(web::Data::new(pool.clone()))
-            .service(
-                web::scope("/api/v1")
-                    .route("/orders", web::post().to(create_order))
-            )
-    })
-    .bind("0.0.0.0:8080")?
-    .run()
-    .await
+pub async fn create_order<R: OrderRepository + 'static>(
+    service: web::Data<Arc<OrderService<R>>>,
+    body: web::Json<CreateOrderRequest>,
+) -> Result<HttpResponse> {
+    let customer_id = body.customer_id.clone().into();
+
+    match service.create_order(customer_id).await {
+        Ok(order) => {
+            let response: OrderResponse = (&order).into();
+            Ok(HttpResponse::Created().json(response))
+        }
+        Err(e) => {
+            Ok(HttpResponse::InternalServerError().json(format!("{}", e)))
+        }
+    }
 }
 
-async fn create_order() -> impl actix_web::Responder {
-    "Under Construction"
+pub async fn get_order<R: OrderRepository + 'static>(
+    service: web::Data<Arc<OrderService<R>>>,
+    path: web::Path<String>,
+) -> Result<HttpResponse> {
+    let order_id = OrderId::new(path.into_inner());
+
+    match service.get_order(order_id).await {
+        Ok(Some(order)) => {
+            let response: OrderResponse = (&order).into();
+            Ok(HttpResponse::Ok().json(response))
+        }
+        Ok(None) => Ok(HttpResponse::NotFound().finish()),
+        Err(e) => Ok(HttpResponse::InternalServerError().json(format!("{}", e))),
+    }
 }

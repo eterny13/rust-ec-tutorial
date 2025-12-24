@@ -13,6 +13,7 @@ pub enum OrderRepositoryError {
     Other(String),
 }
 
+#[cfg_attr(test, mockall::automock)]
 #[async_trait]
 pub trait OrderRepository: Send + Sync {
     async fn find_by_id(&self, id: OrderId) -> Result<Option<Order>, OrderRepositoryError>;
