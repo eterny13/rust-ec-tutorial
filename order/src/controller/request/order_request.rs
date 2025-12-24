@@ -3,11 +3,11 @@ use serde::Deserialize;
 #[derive(Deserialize)]
 pub struct CreateOrderRequest {
     pub customer_id: String,
-    pub items: Vec<OrderItemRequest>,
 }
 
 #[derive(Deserialize)]
-pub struct OrderItemRequest {
+pub struct OrderProductRequest {
     pub product_id: String,
     pub quantity: u32,
+    pub unit_price: u64,
 }
