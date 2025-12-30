@@ -3,6 +3,8 @@ use serde::Deserialize;
 #[derive(Deserialize)]
 pub struct CreateOrderRequest {
     pub customer_id: String,
+    pub product_id: String,
+    pub quantity: u32,
 }
 
 #[derive(Deserialize)]

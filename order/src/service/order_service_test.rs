@@ -51,7 +51,7 @@ mod tests {
       status: OrderStatus::PendingPayment,
       products: vec![],
     };
-    let product = Product::new("product-1", 100, 1);
+    let product = Product::generate("product-1", 100, 1);
     let expected_product = product.clone();
 
     mock_repo

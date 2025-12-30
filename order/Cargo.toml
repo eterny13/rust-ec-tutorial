@@ -36,5 +36,8 @@ uuid = { workspace = true }
 chrono = { workspace = true }
 dotenv = { workspace = true }
 
+# kafka
+rdkafka = { workspace = true }
+
 [dev-dependencies]
 mockall = { workspace = true }

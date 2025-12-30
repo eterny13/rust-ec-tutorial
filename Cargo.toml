@@ -37,7 +37,7 @@ chrono = { version = "0.4", features = ["serde"] }
 dotenv = "0.15"
 
 # Kafka
-rdkafka = { version = "0.36", features = ["cmake-build"] }
+rdkafka = { version = "0.36" }
 
 # Testing
 mockall = "0.13"

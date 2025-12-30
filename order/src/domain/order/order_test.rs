@@ -65,8 +65,8 @@ mod tests {
       products: Vec::new(),
     };
 
-    let product1 = Product::new("p1", 500, 2);
-    let product2 = Product::new("p2", 300, 3);
+    let product1 = Product::generate("p1", 500, 2);
+    let product2 = Product::generate("p2", 300, 3);
 
     order.add_product(product1).unwrap();
     order.add_product(product2).unwrap();

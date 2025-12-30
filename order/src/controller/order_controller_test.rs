@@ -28,7 +28,9 @@ mod tests {
         let req = test::TestRequest::post()
             .uri("/orders")
             .set_json(serde_json::json!({
-                "customer_id": "customer-1"
+                "customer_id": "customer-1",
+                "product_id": "product-1",
+                "quantity": 1,
             }))
             .to_request();
 
@@ -57,7 +59,9 @@ mod tests {
         let req = test::TestRequest::post()
           .uri("/orders")
           .set_json(serde_json::json!({
-                "customer_id": "customer-1"
+                "customer_id": "customer-1",
+                "product_id": "product-1",
+                "quantity": 1,
             }))
           .to_request();
 
