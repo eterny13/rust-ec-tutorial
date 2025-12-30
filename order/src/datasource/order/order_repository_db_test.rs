@@ -4,7 +4,7 @@ mod tests {
   use sqlx::MySqlPool;
   use crate::domain::order::{Order, OrderStatus, OrderId};
   use crate::domain::customer::CustomerId;
-  use crate::datasource::order_repository_db::OrderRepositoryDb;
+  use crate::datasource::order::order_repository_db::OrderRepositoryDb;
   use crate::service::order_repository::OrderRepository;
 
   async fn get_test_pool() -> MySqlPool {

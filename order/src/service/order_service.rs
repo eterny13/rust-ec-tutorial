@@ -32,6 +32,22 @@ impl<R: OrderRepository> OrderService<R> {
         Ok(order)
     }
 
+    /// 1 order: 1 product
+    pub async fn create_order_with_product(
+        &self,
+        customer_id: CustomerId,
+        product_id: crate::domain::product::ProductId,
+        quantity: u32,
+        unit_price: u64,
+    ) -> Result<Order, OrderServiceError> {
+        let mut order = Order::new(customer_id);
+        // TODO: ProductName from product service
+        let product = Product::new(product_id, "Product", unit_price, quantity);
+        order.add_product(product)?;
+        self.repository.save(&order).await?;
+        Ok(order)
+    }
+
     pub async fn add_product_to_order(&self, order_id: OrderId, product: Product) -> Result<(), OrderServiceError> {
         let mut order = self.repository
           .find_by_id(order_id).await?

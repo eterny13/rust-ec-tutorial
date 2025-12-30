@@ -7,7 +7,7 @@ mod datasource;
 mod controller;
 
 use datasource::connection_pool::establish_connection;
-use datasource::order_repository_db::OrderRepositoryDb;
+use datasource::order::order_repository_db::OrderRepositoryDb;
 use service::order_service::OrderService;
 use controller::order_controller;
 
