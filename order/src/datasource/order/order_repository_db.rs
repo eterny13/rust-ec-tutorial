@@ -2,12 +2,12 @@ use async_trait::async_trait;
 use sqlx::MySqlPool;
 use crate::domain::order::{Order, OrderId, OrderStatus};
 use crate::domain::customer::CustomerId;
-use crate::datasource::order_record::OrderRecord;
+use crate::datasource::order::order_record::OrderRecord;
 use crate::service::order_repository::{OrderRepository, OrderRepositoryError};
 
 #[derive(Debug, Clone)]
 pub struct OrderRepositoryDb {
-    pool: sqlx::MySqlPool,
+    pool: MySqlPool,
 }
 
 impl OrderRepositoryDb {
