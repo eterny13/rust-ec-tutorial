@@ -30,15 +30,18 @@ impl InventoryRepository for InventoryRepositoryDb {
     .bind(product_id.0.clone())
     .fetch_optional(&self.pool)
     .await
-    .map_err(|_| InventoryError::ProductNotFound("Failed to find product".to_string()))?;
+    .map_err(|e| {
+        tracing::error!("Failed to fetch inventory: {:?}", e);
+        InventoryError::Infrastructure(format!("Database error: {}", e))
+    })?;
 
     match rec {
       Some(rec) => {
         Ok(Some(
           Inventory::new(
             ProductId(rec.id),
-            rec.available_quantity,
-            rec.reserved_quantity,
+            rec.available_quantity as u32,
+            rec.reserved_quantity as u32,
           )
         ))
       }
@@ -47,7 +50,7 @@ impl InventoryRepository for InventoryRepositoryDb {
   }
 
   async fn save(&self, inventory: &Inventory) -> Result<(), InventoryError> {
-    sqlx::query!(
+    sqlx::query(
       r#"
       INSERT INTO inventories (id, available_quantity, reserved_quantity, created_at, updated_at)
       VALUES (?, ?, ?, NOW(), NOW())
@@ -55,11 +58,11 @@ impl InventoryRepository for InventoryRepositoryDb {
         available_quantity = VALUES(available_quantity),
         reserved_quantity = VALUES(reserved_quantity),
         updated_at = NOW()
-      "#,
-      inventory.product_id.0,
-      inventory.available_quantity,
-      inventory.reserved_quantity
+      "#
     )
+    .bind(&inventory.product_id.0)
+    .bind(inventory.available_quantity as i32)
+    .bind(inventory.reserved_quantity as i32)
     .execute(&self.pool)
     .await
     .map_err(|_| InventoryError::Infrastructure("Failed to save inventory".to_string()))?;
