@@ -50,11 +50,11 @@ async fn main() -> std::io::Result<()> {
                 web::scope("")
                     .route(
                         "/orders",
-                        web::post().to(order_controller::create_order::<OrderRepositoryDb>),
+                        web::post().to(order_controller::create_order::<OrderRepositoryDb, KafkaEventPublisher>),
                     )
                     .route(
                         "/orders/{id}",
-                        web::get().to(order_controller::get_order::<OrderRepositoryDb>),
+                        web::get().to(order_controller::get_order::<OrderRepositoryDb, KafkaEventPublisher>),
                     ),
             )
     })

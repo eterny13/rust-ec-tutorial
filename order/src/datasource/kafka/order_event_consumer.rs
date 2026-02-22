@@ -1,4 +1,5 @@
 use crate::domain::order::{Order, OrderError, OrderId};
+use crate::service::event_publisher::EventPublisher;
 use crate::service::order_repository::OrderRepository;
 use futures::StreamExt;
 use rdkafka::config::ClientConfig;
@@ -49,7 +50,7 @@ impl OrderEventConsumer {
         Self { consumer }
     }
 
-    pub async fn start<R: OrderRepository>(&self, repository: Arc<R>, publisher: Arc<crate::datasource::kafka::kafka_publisher::KafkaEventPublisher>) {
+    pub async fn start<R: OrderRepository, E: EventPublisher>(&self, repository: Arc<R>, publisher: Arc<E>) {
         let mut stream = self.consumer.stream();
 
         while let Some(result) = stream.next().await {
@@ -65,11 +66,11 @@ impl OrderEventConsumer {
         }
     }
 
-    async fn handle_event<R: OrderRepository>(
+    async fn handle_event<R: OrderRepository, E: EventPublisher>(
         &self,
         payload: &str,
         repository: &Arc<R>,
-        publisher: &Arc<crate::datasource::kafka::kafka_publisher::KafkaEventPublisher>,
+        publisher: &Arc<E>,
     ) {
         #[derive(Deserialize)]
         enum IncomingEvent {

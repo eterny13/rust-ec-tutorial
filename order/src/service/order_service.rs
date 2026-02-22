@@ -1,4 +1,4 @@
-use crate::datasource::kafka::kafka_publisher::KafkaEventPublisher;
+use crate::service::event_publisher::EventPublisher;
 use crate::domain::customer::CustomerId;
 use crate::domain::order::event::OrderEvent;
 use crate::domain::order::{Order, OrderError, OrderId};
@@ -22,13 +22,13 @@ pub enum OrderServiceError {
     EventPublishing(String),
 }
 
-pub struct OrderService<R: OrderRepository> {
+pub struct OrderService<R: OrderRepository, E: EventPublisher> {
     repository: Arc<R>,
-    event_publisher: Arc<KafkaEventPublisher>,
+    event_publisher: Arc<E>,
 }
 
-impl<R: OrderRepository> OrderService<R> {
-    pub fn new(repository: Arc<R>, event_publisher: Arc<KafkaEventPublisher>) -> Self {
+impl<R: OrderRepository, E: EventPublisher> OrderService<R, E> {
+    pub fn new(repository: Arc<R>, event_publisher: Arc<E>) -> Self {
         Self {
             repository,
             event_publisher,
@@ -92,3 +92,4 @@ impl<R: OrderRepository> OrderService<R> {
         Ok(order)
     }
 }
+

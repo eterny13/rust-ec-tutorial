@@ -1,5 +1,5 @@
 use crate::domain::order::event::OrderEvent;
-use crate::service::order_service::OrderServiceError;
+use crate::service::event_publisher::EventPublisher;
 use rdkafka::config::ClientConfig;
 use rdkafka::producer::{FutureProducer, FutureRecord};
 use std::time::Duration;
@@ -22,8 +22,11 @@ impl KafkaEventPublisher {
             topic: topic.to_owned(),
         }
     }
+}
 
-    pub async fn publish(&self, event: &OrderEvent) -> Result<(), String> {
+#[async_trait::async_trait]
+impl EventPublisher for KafkaEventPublisher {
+    async fn publish(&self, event: &OrderEvent) -> Result<(), String> {
         let payload = serde_json::to_string(event).map_err(|e| e.to_string())?;
 
         let key = match event {
