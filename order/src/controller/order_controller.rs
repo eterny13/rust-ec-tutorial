@@ -2,13 +2,14 @@ use actix_web::{web, HttpResponse, Result};
 use std::sync::Arc;
 use crate::domain::order::OrderId;
 use crate::domain::product::ProductId;
+use crate::service::event_publisher::EventPublisher;
 use crate::service::order_repository::OrderRepository;
 use crate::service::order_service::OrderService;
 use super::request::order_request::{CreateOrderRequest};
 use super::response::order_response::OrderResponse;
 
-pub async fn create_order<R: OrderRepository + 'static>(
-    service: web::Data<Arc<OrderService<R>>>,
+pub async fn create_order<R: OrderRepository + 'static, E: EventPublisher + 'static>(
+    service: web::Data<Arc<OrderService<R, E>>>,
     body: web::Json<CreateOrderRequest>,
 ) -> Result<HttpResponse> {
     let customer_id = body.customer_id.clone().into();
@@ -28,8 +29,8 @@ pub async fn create_order<R: OrderRepository + 'static>(
     }
 }
 
-pub async fn get_order<R: OrderRepository + 'static>(
-    service: web::Data<Arc<OrderService<R>>>,
+pub async fn get_order<R: OrderRepository + 'static, E: EventPublisher + 'static>(
+    service: web::Data<Arc<OrderService<R, E>>>,
     path: web::Path<String>,
 ) -> Result<HttpResponse> {
     let order_id = OrderId::new(path.into_inner());
@@ -43,3 +44,4 @@ pub async fn get_order<R: OrderRepository + 'static>(
         Err(e) => Ok(HttpResponse::InternalServerError().json(format!("{}", e))),
     }
 }
+

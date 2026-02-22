@@ -1,10 +1,13 @@
-pub mod kafka_event_publisher;
+pub mod kafka;
 pub mod payment_gateway_impl;
 pub mod payment_record;
 pub mod payment_repository_db;
 
-pub use kafka_event_publisher::{KafkaEventPublishError, KafkaEventPublisher};
-pub use payment_repository_db::PaymentRepositoryDb;
+pub use crate::datasource::kafka::kafka_event_publisher::{
+    KafkaEventPublishError, KafkaEventPublisher,
+};
+pub use crate::datasource::payment_repository_db::PaymentRepositoryDb;
+pub use kafka::kafka_consumer::KafkaEventConsumer;
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::MySqlPool;
 

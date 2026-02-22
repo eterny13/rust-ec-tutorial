@@ -26,15 +26,39 @@ async fn main() -> std::io::Result<()> {
         .expect("Failed to create pool");
 
     let repository = Arc::new(PaymentRepositoryDb::new(pool));
+    // Implementation of PaymentRepository is required for PaymentService
+    // We need to clone repository for the service and consumer? 
+    // Actually PaymentService takes Arc<R>, so we can clone the Arc<PaymentRepositoryDb> if needed, 
+    // or just pass the repository struct if it implements Clone (which it likely doesn't if it holds a pool, but pool is cloneable).
+    // PaymentRepositoryDb holds a Pool which is cloneable.
+    
+    // PaymentGatewayImpl
     let gateway = Arc::new(PaymentGatewayImpl::new());
-    let publisher = Arc::new(KafkaEventPublisher::new(&kafka_brokers, "inventory-events"));
-    let service = Arc::new(PaymentService::new(repository, gateway, publisher));
+    
+    // Publisher for Payment events
+    let publisher = Arc::new(KafkaEventPublisher::new(&kafka_brokers, "payment-events"));
+    
+    let service = Arc::new(PaymentService::new(repository, gateway, publisher.clone()));
 
-    tracing::info!("Starting Inventory Service - Kafka Consumer");
+    // Consumer for Order events (Saga orchestration)
+    let consumer = crate::datasource::KafkaEventConsumer::new(
+        &kafka_brokers,
+        "payment-service-group",
+        &["order-events"],
+    );
+
+    let service_clone = service.clone();
+    let publisher_clone = publisher.clone();
+    tokio::spawn(async move {
+        tracing::info!("Starting Kafka Consumer...");
+        consumer.start(service_clone, publisher_clone).await;
+    });
+
+    tracing::info!("Starting Payment Service on 0.0.0.0:8081");
 
     HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(service.clone()))
+            .app_data(web::Data::from(service.clone())) // Use from to avoid double wrapping if service is already Arc
             .service(web::scope("").route(
                 "/payments",
                 web::post().to(payment_controller::process_payment::<
@@ -43,7 +67,7 @@ async fn main() -> std::io::Result<()> {
                 >),
             ))
     })
-    .bind("0.0.0.0:8080")?
+    .bind("0.0.0.0:8081")?
     .run()
     .await
 }

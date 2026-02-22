@@ -45,7 +45,7 @@ impl OrderRepository for OrderRepositoryDb {
   }
 
   async fn save(&self, order: &Order) -> Result<(), OrderRepositoryError> {
-    sqlx::query!(
+    sqlx::query(
       r#"
       INSERT INTO orders (id, customer_id, status, total_amount, created_at, updated_at)
       VALUES (?, ?, ?, ?, NOW(), NOW())
@@ -54,12 +54,12 @@ impl OrderRepository for OrderRepositoryDb {
         status = VALUES(status),
         total_amount = VALUES(total_amount),
         updated_at = NOW()
-      "#,
-      order.id().0.as_str(),
-      order.customer_id().0.as_str(),
-      order.status.as_str(),
-      order.total_amount() as i64
+      "#
     )
+    .bind(order.id().0.as_str())
+    .bind(order.customer_id().0.as_str())
+    .bind(order.status.as_str())
+    .bind(order.total_amount() as i64)
     .execute(&self.pool)
     .await
     .map_err(|_| OrderRepositoryError::Other("Failed to save order".to_string()))?;

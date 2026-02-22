@@ -1,6 +1,5 @@
 CREATE TABLE inventories (
     id VARCHAR(255) PRIMARY KEY,
-    product_id VARCHAR(255) NOT NULL,
     available_quantity INT NOT NULL,
     reserved_quantity INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

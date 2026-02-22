@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use crate::domain::inventory::inventory_error::InventoryError;
 use crate::domain::product::ProductId;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Inventory {
   pub product_id: ProductId,
   pub available_quantity: u32,

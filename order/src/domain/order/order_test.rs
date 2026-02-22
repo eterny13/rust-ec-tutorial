@@ -5,10 +5,10 @@ mod tests {
   use crate::domain::customer::CustomerId;
 
   #[test]
-  fn test_add_product_when_pending_payment() {
+  fn test_add_product_when_awaiting_inventory() {
     let order = Order::new(CustomerId::new("customer-11"));
 
-    assert!(matches!(order.status, OrderStatus::PendingPayment));
+    assert!(matches!(order.status, OrderStatus::AwaitingInventory));
     assert!(order.products().is_empty());
   }
 
@@ -17,7 +17,7 @@ mod tests {
     let mut order = Order { 
       id: OrderId::new("order-1"),
       customer_id: CustomerId::new("customer-1"),
-      status: OrderStatus::PendingPayment,
+      status: OrderStatus::AwaitingInventory,
       products: Vec::new(),
     };
 
@@ -39,11 +39,11 @@ mod tests {
     let mut order = Order { 
       id: OrderId::new("order-1"),
       customer_id: CustomerId::new("customer-1"),
-      status: OrderStatus::PendingPayment,
+      status: OrderStatus::InventoryReserved,
       products: Vec::new(),
     };
 
-    order.mark_as_paid().unwrap();
+    order.complete_payment().unwrap();
 
     let product = Product {
       id: ProductId::new("product-1"),
@@ -61,7 +61,7 @@ mod tests {
     let mut order = Order { 
       id: OrderId::new("order-1"),
       customer_id: CustomerId::new("customer-1"),
-      status: OrderStatus::PendingPayment,
+      status: OrderStatus::AwaitingInventory,
       products: Vec::new(),
     };
 
@@ -85,12 +85,12 @@ mod tests {
       products: Vec::new(),
     };
 
-    let actual = order.mark_as_paid();
+    let actual = order.complete_payment();
     assert!(actual.is_err());
     
     // verify error details
     let err = actual.unwrap_err();
     assert!(matches!(err, OrderError::InvalidStatusTransition { current, action } 
-      if current == "Paid" && action == "mark_as_paid"));
+      if current == "Paid" && action == "complete_payment"));
   }
 }

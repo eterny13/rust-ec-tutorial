@@ -17,7 +17,7 @@ impl Order {
       id: OrderId::generate(),
       customer_id,
       products: Vec::new(),
-      status: OrderStatus::PendingPayment,
+      status: OrderStatus::AwaitingInventory,
     }
   }
 
@@ -36,19 +36,56 @@ impl Order {
     self.products.iter().map(|p| p.subtotal()).sum()
   }
 
-  pub fn mark_as_paid(&mut self) -> Result<(), OrderError> {
+  pub fn reserve_inventory(&mut self) -> Result<(), OrderError> {
     match &self.status {
-      OrderStatus::PendingPayment => {
-        self.status = OrderStatus::Paid;
+      OrderStatus::AwaitingInventory => {
+        self.status = OrderStatus::InventoryReserved;
+        Ok(())
       }
-      _ => {
-        return Err(OrderError::InvalidStatusTransition {
-          current: format!("{:?}", self.status),
-          action: "mark_as_paid".to_string()
-        })
-      }
+      _ => Err(OrderError::InvalidStatusTransition {
+        current: format!("{:?}", self.status),
+        action: "reserve_inventory".to_string()
+      })
     }
-    Ok(())
+  }
+
+  pub fn inventory_failed(&mut self, reason: String) -> Result<(), OrderError> {
+    match &self.status {
+      OrderStatus::AwaitingInventory => {
+        self.status = OrderStatus::InventoryFailed(reason);
+        Ok(())
+      }
+      _ => Err(OrderError::InvalidStatusTransition {
+        current: format!("{:?}", self.status),
+        action: "inventory_failed".to_string()
+      })
+    }
+  }
+
+  pub fn complete_payment(&mut self) -> Result<(), OrderError> {
+    match &self.status {
+      OrderStatus::InventoryReserved | OrderStatus::PendingPayment => {
+        self.status = OrderStatus::Paid;
+        Ok(())
+      }
+      _ => Err(OrderError::InvalidStatusTransition {
+        current: format!("{:?}", self.status),
+        action: "complete_payment".to_string()
+      })
+    }
+  }
+
+  pub fn fail_payment(&mut self, reason: String) -> Result<(), OrderError> {
+    match &self.status {
+      OrderStatus::InventoryReserved | OrderStatus::PendingPayment => {
+        self.status = OrderStatus::PaymentFailed(reason);
+        Ok(())
+      }
+      _ => Err(OrderError::InvalidStatusTransition {
+        current: format!("{:?}", self.status),
+        action: "fail_payment".to_string()
+      })
+    }
   }
 
   pub fn id(&self) -> &OrderId {

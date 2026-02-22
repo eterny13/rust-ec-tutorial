@@ -3,6 +3,7 @@ members = [
     "order",
     "inventory",
     "payment",
+    "integration-tests",
 ]
 resolver = "2"
 
